@@ -1,5 +1,5 @@
 name: Dispatch CI
-description: GitHub Action to trigger ci.yml workflow_dispatch event via GitHub API with branch dynamically chosen
+description: GitHub Action to trigger ci.yml workflow_dispatch event via GitHub API
 
 runs:
   using: composite
@@ -21,12 +21,13 @@ runs:
           date_part=$(date +%H)
         fi
         if (( $date_part % 2 == 1 )); then
+          # latest major, next-minor e.g. "5"
           type=latest,next-minor
         else
+          # previous major, next-patch e.g. "4.13"
           type=previous,next-patch
         fi
-        # TODO: update to newer method
-        echo "::set-output name=type::$type"
+        echo "type=$type" >> $GITHUB_OUTPUT
 
     - name: Get branch
       id: getbranch
@@ -80,11 +81,8 @@ runs:
             branch="$minor_branch"
         fi
         rm __branches.json
-        echo "major_branch is $major_branch"
-        echo "minor_branch is $minor_branch"
         echo "branch is $branch"
-        # TODO: update to newer method
-        echo "::set-output name=branch::$branch"
+        echo "branch=$branch" >> $GITHUB_OUTPUT
 
     - name: Send API request
       shell: bash
